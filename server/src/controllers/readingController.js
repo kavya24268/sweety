@@ -130,6 +130,40 @@ const createReading = async (req, res) => {
   }
 };
 
+
+const getReadings = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+
+    const result = await pool.query(
+      `SELECT
+        id,
+        reading_date,
+        slot,
+        glucose_value,
+        created_at,
+        updated_at
+       FROM readings
+       WHERE user_id = $1
+       ORDER BY reading_date DESC, created_at DESC`,
+      [userId]
+    );
+
+    return res.status(200).json({
+      success: true,
+      readings: result.rows,
+    });
+  } catch (error) {
+    console.error("Get readings error:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
 module.exports = {
   createReading,
+  getReadings,
 };

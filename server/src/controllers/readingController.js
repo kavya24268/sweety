@@ -130,7 +130,6 @@ const createReading = async (req, res) => {
   }
 };
 
-
 const getReadings = async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -163,7 +162,48 @@ const getReadings = async (req, res) => {
   }
 };
 
+const getReadingById = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const readingId = req.params.id;
+
+    const result = await pool.query(
+      `SELECT
+        id,
+        reading_date,
+        slot,
+        glucose_value,
+        created_at,
+        updated_at
+       FROM readings
+       WHERE id = $1
+       AND user_id = $2`,
+      [readingId, userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Reading not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      reading: result.rows[0],
+    });
+  } catch (error) {
+    console.error("Get reading by ID error:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
 module.exports = {
   createReading,
   getReadings,
+  getReadingById,
 };

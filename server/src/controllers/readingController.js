@@ -325,9 +325,46 @@ const updateReading = async (req, res) => {
   }
 };
 
+const deleteReading = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const readingId = req.params.id;
+
+    // Delete only the reading belonging to the logged-in user
+    const result = await pool.query(
+      `DELETE FROM readings
+       WHERE id = $1
+       AND user_id = $2
+       RETURNING id, reading_date, slot, glucose_value`,
+      [readingId, userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Reading not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Glucose reading deleted successfully",
+      reading: result.rows[0],
+    });
+  } catch (error) {
+    console.error("Delete reading error:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
 module.exports = {
   createReading,
   getReadings,
   getReadingById,
   updateReading,
+  deleteReading,
 };

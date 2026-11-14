@@ -165,39 +165,30 @@ const getMonthToDateReport = async (req, res) => {
 
 // =========================
 // MONTHLY REPORT
-// SELECTED FULL CALENDAR MONTH
+// PREVIOUS CALENDAR MONTH
 // =========================
 
 const getMonthlyReport = async (req, res) => {
   try {
-    const { month } = req.query;
+    const today = new Date();
 
-    if (!month) {
-      return res.status(400).json({
-        success: false,
-        message: "Month is required",
-      });
-    }
+    // Get the previous calendar month
+    const previousMonth = new Date(
+      today.getFullYear(),
+      today.getMonth() - 1,
+      1
+    );
 
-    // Validate YYYY-MM format
-    if (!/^\d{4}-\d{2}$/.test(month)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid month format",
-      });
-    }
+    const year = previousMonth.getFullYear();
+    const monthNumber = previousMonth.getMonth() + 1;
 
-    const [year, monthNumber] = month
-      .split("-")
-      .map(Number);
-
-    // First day of selected month
+    // First day of previous month
     const startDate = `${year}-${String(monthNumber).padStart(
       2,
       "0"
     )}-01`;
 
-    // Last day of selected month
+    // Last day of previous month
     const lastDay = new Date(
       year,
       monthNumber,
@@ -261,14 +252,14 @@ const getMonthlyReport = async (req, res) => {
           )
         : null;
 
-    const monthLabel = new Date(
-      year,
-      monthNumber - 1,
-      1
-    ).toLocaleDateString("en-US", {
-      month: "long",
-      year: "numeric",
-    });
+    const monthLabel =
+      previousMonth.toLocaleDateString(
+        "en-US",
+        {
+          month: "long",
+          year: "numeric",
+        }
+      );
 
     return res.status(200).json({
       success: true,

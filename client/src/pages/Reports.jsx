@@ -14,10 +14,6 @@ function Reports() {
     new Date().toISOString().split("T")[0]
   );
 
-  const [selectedMonth, setSelectedMonth] = useState(
-    new Date().toISOString().slice(0, 7)
-  );
-
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -34,7 +30,7 @@ function Reports() {
       } else if (reportType === "month-to-date") {
         endpoint = `/reports/month-to-date?date=${selectedDate}`;
       } else {
-        endpoint = `/reports/monthly?month=${selectedMonth}`;
+        endpoint = `/reports/monthly`;
       }
 
       const response = await fetch(
@@ -75,10 +71,6 @@ function Reports() {
   const today = new Date()
     .toISOString()
     .split("T")[0];
-
-  const currentMonth = new Date()
-    .toISOString()
-    .slice(0, 7);
 
   return (
     <div className="reports-page">
@@ -132,18 +124,19 @@ function Reports() {
 
           {reportType === "monthly" ? (
             <div className="form-group">
-              <label htmlFor="month">
-                Month
+              <label htmlFor="monthlyPeriod">
+                Period
               </label>
 
               <input
-                id="month"
-                type="month"
-                value={selectedMonth}
-                max={currentMonth}
-                onChange={(event) =>
-                  setSelectedMonth(event.target.value)
+                id="monthlyPeriod"
+                type="text"
+                value={
+                  report
+                    ? report.month
+                    : "Loading previous month..."
                 }
+                readOnly
               />
             </div>
           ) : (

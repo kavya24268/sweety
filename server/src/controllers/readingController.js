@@ -111,7 +111,7 @@ const createReading = async (req, res) => {
         glucose_value
       )
       VALUES ($1, $2, $3, $4)
-      RETURNING id, reading_date, slot, glucose_value, created_at`,
+      RETURNING id, reading_date::text AS reading_date, slot, glucose_value, created_at`,
       [userId, readingDate, slot, glucoseValue]
     );
 
@@ -137,7 +137,7 @@ const getReadings = async (req, res) => {
     const result = await pool.query(
       `SELECT
         id,
-        reading_date,
+        reading_date::text AS reading_date,
         slot,
         glucose_value,
         created_at,
@@ -170,7 +170,7 @@ const getReadingById = async (req, res) => {
     const result = await pool.query(
       `SELECT
         id,
-        reading_date,
+        reading_date::text AS reading_date,
         slot,
         glucose_value,
         created_at,
@@ -306,7 +306,7 @@ const updateReading = async (req, res) => {
            updated_at = CURRENT_TIMESTAMP
        WHERE id = $4
        AND user_id = $5
-       RETURNING id, reading_date, slot, glucose_value, created_at, updated_at`,
+       RETURNING id, reading_date::text AS reading_date, slot, glucose_value, created_at, updated_at`,
       [readingDate, slot, glucoseValue, readingId, userId]
     );
 
@@ -335,7 +335,7 @@ const deleteReading = async (req, res) => {
       `DELETE FROM readings
        WHERE id = $1
        AND user_id = $2
-       RETURNING id, reading_date, slot, glucose_value`,
+       RETURNING id, reading_date::text AS reading_date, slot, glucose_value`,
       [readingId, userId]
     );
 

@@ -1,11 +1,11 @@
 const pool = require("../config/db");
 
-const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
-const MONTH_PATTERN = /^\d{4}-\d{2}$/;
+// =========================
+// DAILY REPORT
+// =========================
 
 const getDailyReport = async (req, res) => {
   try {
-    const userId = req.user.userId;
     const { date } = req.query;
 
     if (!date) {
@@ -15,22 +15,15 @@ const getDailyReport = async (req, res) => {
       });
     }
 
-    if (!DATE_PATTERN.test(date)) {
-      return res.status(400).json({
-        success: false,
-        message: "Date must be in YYYY-MM-DD format",
-      });
-    }
-
     const result = await pool.query(
       `SELECT
-        id,
-        reading_date::text AS reading_date,
-        slot,
-        glucose_value
+          id,
+          reading_date::text AS reading_date,
+          slot,
+          glucose_value
        FROM readings
        WHERE user_id = $1
-       AND reading_date = $2
+         AND reading_date = $2
        ORDER BY
          CASE slot
            WHEN 'Morning' THEN 1
@@ -38,35 +31,30 @@ const getDailyReport = async (req, res) => {
            WHEN 'After lunch' THEN 3
            WHEN 'After dinner' THEN 4
          END`,
-      [userId, date]
+      [req.user.userId, date]
     );
 
     const readings = result.rows;
 
-    if (readings.length === 0) {
-      return res.status(200).json({
-        success: true,
-        report: {
-          date,
-          highest: null,
-          lowest: null,
-          average: null,
-          count: 0,
-          readings: [],
-        },
-      });
-    }
-
-    const glucoseValues = readings.map(
+    const values = readings.map(
       (reading) => Number(reading.glucose_value)
     );
 
-    const highest = Math.max(...glucoseValues);
-    const lowest = Math.min(...glucoseValues);
+    const highest =
+      values.length > 0 ? Math.max(...values) : null;
+
+    const lowest =
+      values.length > 0 ? Math.min(...values) : null;
 
     const average =
-      glucoseValues.reduce((sum, value) => sum + value, 0) /
-      glucoseValues.length;
+      values.length > 0
+        ? Number(
+            (
+              values.reduce((sum, value) => sum + value, 0) /
+              values.length
+            ).toFixed(1)
+          )
+        : null;
 
     return res.status(200).json({
       success: true,
@@ -74,7 +62,7 @@ const getDailyReport = async (req, res) => {
         date,
         highest,
         lowest,
-        average: Number(average.toFixed(1)),
+        average,
         count: readings.length,
         readings,
       },
@@ -84,14 +72,18 @@ const getDailyReport = async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Failed to generate daily report",
     });
   }
 };
 
+
+// =========================
+// MONTH-TO-DATE REPORT
+// =========================
+
 const getMonthToDateReport = async (req, res) => {
   try {
-    const userId = req.user.userId;
     const { date } = req.query;
 
     if (!date) {
@@ -101,24 +93,17 @@ const getMonthToDateReport = async (req, res) => {
       });
     }
 
-    if (!DATE_PATTERN.test(date)) {
-      return res.status(400).json({
-        success: false,
-        message: "Date must be in YYYY-MM-DD format",
-      });
-    }
-
-    const firstDayOfMonth = `${date.substring(0, 7)}-01`;
+    const startDate = `${date.substring(0, 7)}-01`;
 
     const result = await pool.query(
       `SELECT
-        id,
-        reading_date::text AS reading_date,
-        slot,
-        glucose_value
+          id,
+          reading_date::text AS reading_date,
+          slot,
+          glucose_value
        FROM readings
        WHERE user_id = $1
-       AND reading_date BETWEEN $2 AND $3
+         AND reading_date BETWEEN $2 AND $3
        ORDER BY
          reading_date ASC,
          CASE slot
@@ -127,62 +112,64 @@ const getMonthToDateReport = async (req, res) => {
            WHEN 'After lunch' THEN 3
            WHEN 'After dinner' THEN 4
          END`,
-      [userId, firstDayOfMonth, date]
+      [req.user.userId, startDate, date]
     );
 
     const readings = result.rows;
 
-    if (readings.length === 0) {
-      return res.status(200).json({
-        success: true,
-        report: {
-          startDate: firstDayOfMonth,
-          endDate: date,
-          highest: null,
-          lowest: null,
-          average: null,
-          count: 0,
-          readings: [],
-        },
-      });
-    }
-
-    const glucoseValues = readings.map(
+    const values = readings.map(
       (reading) => Number(reading.glucose_value)
     );
 
-    const highest = Math.max(...glucoseValues);
-    const lowest = Math.min(...glucoseValues);
+    const highest =
+      values.length > 0 ? Math.max(...values) : null;
+
+    const lowest =
+      values.length > 0 ? Math.min(...values) : null;
 
     const average =
-      glucoseValues.reduce((sum, value) => sum + value, 0) /
-      glucoseValues.length;
+      values.length > 0
+        ? Number(
+            (
+              values.reduce((sum, value) => sum + value, 0) /
+              values.length
+            ).toFixed(1)
+          )
+        : null;
 
     return res.status(200).json({
       success: true,
       report: {
-        startDate: firstDayOfMonth,
+        startDate,
         endDate: date,
         highest,
         lowest,
-        average: Number(average.toFixed(1)),
+        average,
         count: readings.length,
         readings,
       },
     });
   } catch (error) {
-    console.error("Month-to-date report error:", error.message);
+    console.error(
+      "Month-to-date report error:",
+      error.message
+    );
 
     return res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Failed to generate month-to-date report",
     });
   }
 };
 
+
+// =========================
+// MONTHLY REPORT
+// SELECTED FULL CALENDAR MONTH
+// =========================
+
 const getMonthlyReport = async (req, res) => {
   try {
-    const userId = req.user.userId;
     const { month } = req.query;
 
     if (!month) {
@@ -192,25 +179,45 @@ const getMonthlyReport = async (req, res) => {
       });
     }
 
-    if (!MONTH_PATTERN.test(month)) {
+    // Validate YYYY-MM format
+    if (!/^\d{4}-\d{2}$/.test(month)) {
       return res.status(400).json({
         success: false,
-        message: "Month must be in YYYY-MM format",
+        message: "Invalid month format",
       });
     }
 
-    const firstDayOfMonth = `${month}-01`;
+    const [year, monthNumber] = month
+      .split("-")
+      .map(Number);
+
+    // First day of selected month
+    const startDate = `${year}-${String(monthNumber).padStart(
+      2,
+      "0"
+    )}-01`;
+
+    // Last day of selected month
+    const lastDay = new Date(
+      year,
+      monthNumber,
+      0
+    ).getDate();
+
+    const endDate = `${year}-${String(monthNumber).padStart(
+      2,
+      "0"
+    )}-${String(lastDay).padStart(2, "0")}`;
 
     const result = await pool.query(
       `SELECT
-        id,
-        reading_date::text AS reading_date,
-        slot,
-        glucose_value
+          id,
+          reading_date::text AS reading_date,
+          slot,
+          glucose_value
        FROM readings
        WHERE user_id = $1
-       AND reading_date >= $2::date
-       AND reading_date < ($2::date + INTERVAL '1 month')
+         AND reading_date BETWEEN $2 AND $3
        ORDER BY
          reading_date ASC,
          CASE slot
@@ -219,56 +226,80 @@ const getMonthlyReport = async (req, res) => {
            WHEN 'After lunch' THEN 3
            WHEN 'After dinner' THEN 4
          END`,
-      [userId, firstDayOfMonth]
+      [
+        req.user.userId,
+        startDate,
+        endDate,
+      ]
     );
 
     const readings = result.rows;
 
-    if (readings.length === 0) {
-      return res.status(200).json({
-        success: true,
-        report: {
-          month,
-          highest: null,
-          lowest: null,
-          average: null,
-          count: 0,
-          readings: [],
-        },
-      });
-    }
-
-    const glucoseValues = readings.map(
+    const values = readings.map(
       (reading) => Number(reading.glucose_value)
     );
 
-    const highest = Math.max(...glucoseValues);
-    const lowest = Math.min(...glucoseValues);
+    const highest =
+      values.length > 0
+        ? Math.max(...values)
+        : null;
+
+    const lowest =
+      values.length > 0
+        ? Math.min(...values)
+        : null;
 
     const average =
-      glucoseValues.reduce((sum, value) => sum + value, 0) /
-      glucoseValues.length;
+      values.length > 0
+        ? Number(
+            (
+              values.reduce(
+                (sum, value) => sum + value,
+                0
+              ) / values.length
+            ).toFixed(1)
+          )
+        : null;
+
+    const monthLabel = new Date(
+      year,
+      monthNumber - 1,
+      1
+    ).toLocaleDateString("en-US", {
+      month: "long",
+      year: "numeric",
+    });
 
     return res.status(200).json({
       success: true,
       report: {
-        month,
+        month: monthLabel,
+        startDate,
+        endDate,
         highest,
         lowest,
-        average: Number(average.toFixed(1)),
+        average,
         count: readings.length,
         readings,
       },
     });
   } catch (error) {
-    console.error("Monthly report error:", error.message);
+    console.error(
+      "Monthly report error:",
+      error.message
+    );
 
     return res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Failed to generate monthly report",
     });
   }
 };
+
+
+// =========================
+// EXPORTS
+// =========================
 
 module.exports = {
   getDailyReport,

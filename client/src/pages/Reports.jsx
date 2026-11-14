@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const API_BASE_URL = "http://localhost:5000/api";
 
@@ -37,21 +37,27 @@ function Reports() {
         endpoint = `/reports/monthly?month=${selectedMonth}`;
       }
 
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_BASE_URL}${endpoint}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to load report");
+        throw new Error(
+          data.message || "Failed to load report"
+        );
       }
 
       setReport(data.report);
     } catch (error) {
       setError(error.message);
+      setReport(null);
     } finally {
       setLoading(false);
     }
@@ -66,17 +72,23 @@ function Reports() {
     fetchReport();
   };
 
+  const today = new Date()
+    .toISOString()
+    .split("T")[0];
+
+  const currentMonth = new Date()
+    .toISOString()
+    .slice(0, 7);
+
   return (
     <div className="reports-page">
       <div className="reports-container">
 
-        {/* Header */}
+        {/* HEADER */}
         <header className="report-header">
           <div>
-            <div className="brand-small">
-              <h1>Sweety</h1>
-              <p>Blood Glucose Reports</p>
-            </div>
+            <h1>Sweety</h1>
+            <p>Blood Glucose Reports</p>
           </div>
 
           <button
@@ -87,7 +99,7 @@ function Reports() {
           </button>
         </header>
 
-        {/* Report Controls */}
+        {/* CONTROLS */}
         <section className="report-controls">
 
           <div className="form-group">
@@ -101,13 +113,20 @@ function Reports() {
               onChange={(event) => {
                 setReportType(event.target.value);
                 setReport(null);
+                setError("");
               }}
             >
-              <option value="daily">Daily</option>
+              <option value="daily">
+                Daily
+              </option>
+
               <option value="month-to-date">
                 Month-to-Date
               </option>
-              <option value="monthly">Monthly</option>
+
+              <option value="monthly">
+                Monthly
+              </option>
             </select>
           </div>
 
@@ -121,6 +140,7 @@ function Reports() {
                 id="month"
                 type="month"
                 value={selectedMonth}
+                max={currentMonth}
                 onChange={(event) =>
                   setSelectedMonth(event.target.value)
                 }
@@ -136,7 +156,7 @@ function Reports() {
                 id="date"
                 type="date"
                 value={selectedDate}
-                max={new Date().toISOString().split("T")[0]}
+                max={today}
                 onChange={(event) =>
                   setSelectedDate(event.target.value)
                 }
@@ -148,29 +168,32 @@ function Reports() {
             type="button"
             className="report-button"
             onClick={handleSubmit}
+            disabled={loading}
           >
-            Generate Report
+            {loading
+              ? "Loading..."
+              : "Generate Report"}
           </button>
         </section>
 
-        {/* Error */}
+        {/* ERROR */}
         {error && (
           <div className="error-message">
             {error}
           </div>
         )}
 
-        {/* Loading */}
+        {/* LOADING */}
         {loading && (
           <div className="loading">
             Loading report...
           </div>
         )}
 
-        {/* Report */}
+        {/* REPORT */}
         {!loading && report && (
           <>
-            {/* Summary */}
+            {/* SUMMARY */}
             <section className="summary-grid">
 
               <div className="summary-card">
@@ -178,7 +201,7 @@ function Reports() {
 
                 <h3>
                   {report.highest === null
-                    ? "—"
+                    ? "No data"
                     : `${report.highest} mg/dL`}
                 </h3>
               </div>
@@ -188,7 +211,7 @@ function Reports() {
 
                 <h3>
                   {report.lowest === null
-                    ? "—"
+                    ? "No data"
                     : `${report.lowest} mg/dL`}
                 </h3>
               </div>
@@ -198,7 +221,7 @@ function Reports() {
 
                 <h3>
                   {report.average === null
-                    ? "—"
+                    ? "No data"
                     : `${report.average} mg/dL`}
                 </h3>
               </div>
@@ -213,30 +236,27 @@ function Reports() {
 
             </section>
 
-            {/* Readings */}
+            {/* TABLE */}
             <section className="report-table-card">
 
               <h2>
-                {reportType === "daily"
-                  ? `Readings for ${report.date}`
-                  : reportType === "month-to-date"
-                  ? `Readings from ${report.startDate} to ${report.endDate}`
-                  : `Readings for ${report.month}`}
+                {reportType === "daily" &&
+                  `Readings for ${report.date}`}
+
+                {reportType === "month-to-date" &&
+                  `Readings from ${report.startDate} to ${report.endDate}`}
+
+                {reportType === "monthly" &&
+                  `Readings for ${report.month}`}
               </h2>
 
               {report.readings.length === 0 ? (
                 <div className="empty-state">
-                  <p>
-                    No readings found for this period.
-                  </p>
-
-                  <p>
-                    Add a glucose reading from the Dashboard
-                    to see it here.
-                  </p>
+                  No readings found for this period.
                 </div>
               ) : (
                 <div className="table-wrapper">
+
                   <table className="readings-table">
 
                     <thead>
@@ -248,33 +268,35 @@ function Reports() {
                     </thead>
 
                     <tbody>
-                      {report.readings.map((reading) => (
-                        <tr key={reading.id}>
+                      {report.readings.map(
+                        (reading) => (
+                          <tr key={reading.id}>
 
-                          <td>
-                            {reading.reading_date}
-                          </td>
+                            <td>
+                              {reading.reading_date}
+                            </td>
 
-                          <td>
-                            <span className="slot-badge">
-                              {reading.slot}
-                            </span>
-                          </td>
+                            <td>
+                              <span className="slot-badge">
+                                {reading.slot}
+                              </span>
+                            </td>
 
-                          <td>
-                            <span className="glucose-value">
-                              {reading.glucose_value} mg/dL
-                            </span>
-                          </td>
+                            <td>
+                              <span className="glucose-value">
+                                {reading.glucose_value} mg/dL
+                              </span>
+                            </td>
 
-                        </tr>
-                      ))}
+                          </tr>
+                        )
+                      )}
                     </tbody>
 
                   </table>
+
                 </div>
               )}
-
             </section>
           </>
         )}

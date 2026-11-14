@@ -67,126 +67,219 @@ function Reports() {
   };
 
   return (
-    <div>
-      <header>
-        <h1>Sweety Reports</h1>
+    <div className="reports-page">
+      <div className="reports-container">
 
-        <button onClick={() => navigate("/dashboard")}>
-          Back to Dashboard
-        </button>
-      </header>
+        {/* Header */}
+        <header className="report-header">
+          <div>
+            <div className="brand-small">
+              <h1>Sweety</h1>
+              <p>Blood Glucose Reports</p>
+            </div>
+          </div>
 
-      <main>
-        <section>
-          <h2>Report Type</h2>
-
-          <select
-            value={reportType}
-            onChange={(event) => {
-              setReportType(event.target.value);
-              setReport(null);
-            }}
+          <button
+            className="back-button"
+            onClick={() => navigate("/dashboard")}
           >
-            <option value="daily">Daily</option>
-            <option value="month-to-date">Month-to-Date</option>
-            <option value="monthly">Monthly</option>
-          </select>
+            ← Back to Dashboard
+          </button>
+        </header>
 
-          <form onSubmit={handleSubmit}>
-            {reportType === "monthly" ? (
-              <div>
-                <label htmlFor="month">Month</label>
+        {/* Report Controls */}
+        <section className="report-controls">
 
-                <input
-                  id="month"
-                  type="month"
-                  value={selectedMonth}
-                  onChange={(event) =>
-                    setSelectedMonth(event.target.value)
-                  }
-                />
-              </div>
-            ) : (
-              <div>
-                <label htmlFor="date">Date</label>
+          <div className="form-group">
+            <label htmlFor="reportType">
+              Report Type
+            </label>
 
-                <input
-                  id="date"
-                  type="date"
-                  value={selectedDate}
-                  max={new Date().toISOString().split("T")[0]}
-                  onChange={(event) =>
-                    setSelectedDate(event.target.value)
-                  }
-                />
-              </div>
-            )}
+            <select
+              id="reportType"
+              value={reportType}
+              onChange={(event) => {
+                setReportType(event.target.value);
+                setReport(null);
+              }}
+            >
+              <option value="daily">Daily</option>
+              <option value="month-to-date">
+                Month-to-Date
+              </option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </div>
 
-            <button type="submit">Generate Report</button>
-          </form>
+          {reportType === "monthly" ? (
+            <div className="form-group">
+              <label htmlFor="month">
+                Month
+              </label>
+
+              <input
+                id="month"
+                type="month"
+                value={selectedMonth}
+                onChange={(event) =>
+                  setSelectedMonth(event.target.value)
+                }
+              />
+            </div>
+          ) : (
+            <div className="form-group">
+              <label htmlFor="date">
+                Date
+              </label>
+
+              <input
+                id="date"
+                type="date"
+                value={selectedDate}
+                max={new Date().toISOString().split("T")[0]}
+                onChange={(event) =>
+                  setSelectedDate(event.target.value)
+                }
+              />
+            </div>
+          )}
+
+          <button
+            type="button"
+            className="report-button"
+            onClick={handleSubmit}
+          >
+            Generate Report
+          </button>
         </section>
 
-        {error && <p>{error}</p>}
-
-        {loading && <p>Loading report...</p>}
-
-        {!loading && report && (
-          <section>
-            <h2>Summary</h2>
-
-            <p>
-              <strong>Highest:</strong>{" "}
-              {report.highest === null
-                ? "No data"
-                : `${report.highest} mg/dL`}
-            </p>
-
-            <p>
-              <strong>Lowest:</strong>{" "}
-              {report.lowest === null
-                ? "No data"
-                : `${report.lowest} mg/dL`}
-            </p>
-
-            <p>
-              <strong>Average:</strong>{" "}
-              {report.average === null
-                ? "No data"
-                : `${report.average} mg/dL`}
-            </p>
-
-            <p>
-              <strong>Total readings:</strong> {report.count}
-            </p>
-
-            <h2>Readings</h2>
-
-            {report.readings.length === 0 ? (
-              <p>No readings found for this period.</p>
-            ) : (
-              <table>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Slot</th>
-                    <th>Glucose</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {report.readings.map((reading) => (
-                    <tr key={reading.id}>
-                      <td>{reading.reading_date}</td>
-                      <td>{reading.slot}</td>
-                      <td>{reading.glucose_value} mg/dL</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </section>
+        {/* Error */}
+        {error && (
+          <div className="error-message">
+            {error}
+          </div>
         )}
-      </main>
+
+        {/* Loading */}
+        {loading && (
+          <div className="loading">
+            Loading report...
+          </div>
+        )}
+
+        {/* Report */}
+        {!loading && report && (
+          <>
+            {/* Summary */}
+            <section className="summary-grid">
+
+              <div className="summary-card">
+                <p>Highest</p>
+
+                <h3>
+                  {report.highest === null
+                    ? "—"
+                    : `${report.highest} mg/dL`}
+                </h3>
+              </div>
+
+              <div className="summary-card">
+                <p>Lowest</p>
+
+                <h3>
+                  {report.lowest === null
+                    ? "—"
+                    : `${report.lowest} mg/dL`}
+                </h3>
+              </div>
+
+              <div className="summary-card">
+                <p>Average</p>
+
+                <h3>
+                  {report.average === null
+                    ? "—"
+                    : `${report.average} mg/dL`}
+                </h3>
+              </div>
+
+              <div className="summary-card">
+                <p>Total Readings</p>
+
+                <h3>
+                  {report.count}
+                </h3>
+              </div>
+
+            </section>
+
+            {/* Readings */}
+            <section className="report-table-card">
+
+              <h2>
+                {reportType === "daily"
+                  ? `Readings for ${report.date}`
+                  : reportType === "month-to-date"
+                  ? `Readings from ${report.startDate} to ${report.endDate}`
+                  : `Readings for ${report.month}`}
+              </h2>
+
+              {report.readings.length === 0 ? (
+                <div className="empty-state">
+                  <p>
+                    No readings found for this period.
+                  </p>
+
+                  <p>
+                    Add a glucose reading from the Dashboard
+                    to see it here.
+                  </p>
+                </div>
+              ) : (
+                <div className="table-wrapper">
+                  <table className="readings-table">
+
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Slot</th>
+                        <th>Glucose</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {report.readings.map((reading) => (
+                        <tr key={reading.id}>
+
+                          <td>
+                            {reading.reading_date}
+                          </td>
+
+                          <td>
+                            <span className="slot-badge">
+                              {reading.slot}
+                            </span>
+                          </td>
+
+                          <td>
+                            <span className="glucose-value">
+                              {reading.glucose_value} mg/dL
+                            </span>
+                          </td>
+
+                        </tr>
+                      ))}
+                    </tbody>
+
+                  </table>
+                </div>
+              )}
+
+            </section>
+          </>
+        )}
+
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import "../App.css";
 
 const API_BASE_URL = "http://localhost:5000/api";
 
@@ -243,29 +244,51 @@ function Dashboard() {
   };
 
   return (
-    <div>
-      <header>
-        <div>
-          <h1>Sweety</h1>
-          <p>Blood Glucose Tracker</p>
-        </div>
+    <div className="dashboard-page">
+      <div className="dashboard-container">
 
-        <div>
-          <span>Welcome, {user?.name}</span>{" "}
-          <button onClick={handleLogout}>Logout</button>
-        </div>
-      </header>
+        {/* TOP BAR */}
+        <header className="topbar">
+          <div className="brand-small">
+            <h1>Sweety</h1>
+            <p>Blood Glucose Tracker</p>
+          </div>
 
-      <main>
-        <section>
+          <div className="user-area">
+            <span>Welcome, {user?.name}</span>
+
+            <button
+              className="logout-button"
+              onClick={handleLogout}
+            >
+              Logout
+            </button>
+          </div>
+        </header>
+
+        {/* WELCOME */}
+        <section className="welcome-card">
+          <h2>Hello, {user?.name} 🌸</h2>
+
+          <p>
+            Keep track of your blood glucose readings and stay
+            consistent with your daily monitoring.
+          </p>
+        </section>
+
+        {/* ADD / EDIT READING */}
+        <section className="content-card">
           <h2>
-            {editingId ? "Edit Glucose Reading" : "Add Glucose Reading"}
+            {editingId
+              ? "Edit Glucose Reading"
+              : "Add Glucose Reading"}
           </h2>
 
           <form
+            className="reading-form"
             onSubmit={editingId ? handleUpdate : handleSubmit}
           >
-            <div>
+            <div className="form-group">
               <label htmlFor="readingDate">Date</label>
 
               <input
@@ -278,7 +301,7 @@ function Dashboard() {
               />
             </div>
 
-            <div>
+            <div className="form-group">
               <label htmlFor="slot">Reading Slot</label>
 
               <select
@@ -295,7 +318,7 @@ function Dashboard() {
               </select>
             </div>
 
-            <div>
+            <div className="form-group">
               <label htmlFor="glucoseValue">
                 Glucose (mg/dL)
               </label>
@@ -313,78 +336,118 @@ function Dashboard() {
               />
             </div>
 
-            {error && <p>{error}</p>}
-
-            <button type="submit">
+            <button
+              type="submit"
+              className="add-reading-button"
+            >
               {editingId ? "Update Reading" : "Add Reading"}
             </button>
-
-            {editingId && (
-              <button
-                type="button"
-                onClick={handleCancelEdit}
-              >
-                Cancel
-              </button>
-            )}
           </form>
-        </section>
 
-        <section>
-          <h2>Your Readings</h2>
+          {error && (
+            <div className="error-message">
+              {error}
+            </div>
+          )}
 
-          {loading ? (
-            <p>Loading readings...</p>
-          ) : readings.length === 0 ? (
-            <p>No glucose readings yet.</p>
-          ) : (
-            <table>
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Slot</th>
-                  <th>Glucose</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
+          <p className="form-note">
+            Enter a whole-number glucose value between 40 and
+            600 mg/dL.
+          </p>
 
-              <tbody>
-                {readings.map((reading) => (
-                  <tr key={reading.id}>
-                    <td>{reading.reading_date}</td>
-
-                    <td>{reading.slot}</td>
-
-                    <td>
-                      {reading.glucose_value} mg/dL
-                    </td>
-
-                    <td>
-                      <button
-                        onClick={() => handleEdit(reading)}
-                      >
-                        Edit
-                      </button>{" "}
-
-                      <button
-                        onClick={() => handleDelete(reading.id)}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          {editingId && (
+            <button
+              type="button"
+              className="back-button"
+              onClick={handleCancelEdit}
+            >
+              Cancel Edit
+            </button>
           )}
         </section>
 
-        <section>
-          <button onClick={() => navigate("/reports")}>
+        {/* READINGS */}
+        <section className="content-card">
+          <h2>Your Readings</h2>
+
+          {loading ? (
+            <div className="loading">
+              Loading readings...
+            </div>
+          ) : readings.length === 0 ? (
+            <div className="empty-state">
+              <p>No glucose readings yet.</p>
+              <p>Add your first reading above.</p>
+            </div>
+          ) : (
+            <div className="table-wrapper">
+              <table className="readings-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Slot</th>
+                    <th>Glucose</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {readings.map((reading) => (
+                    <tr key={reading.id}>
+                      <td>{reading.reading_date}</td>
+
+                      <td>
+                        <span className="slot-badge">
+                          {reading.slot}
+                        </span>
+                      </td>
+
+                      <td>
+                        <span className="glucose-value">
+                          {reading.glucose_value} mg/dL
+                        </span>
+                      </td>
+
+                      <td>
+                        <div className="action-buttons">
+                          <button
+                            className="edit-button"
+                            onClick={() =>
+                              handleEdit(reading)
+                            }
+                          >
+                            Edit
+                          </button>
+
+                          <button
+                            className="delete-button"
+                            onClick={() =>
+                              handleDelete(reading.id)
+                            }
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        {/* REPORTS */}
+        <section className="content-card">
+          <button
+            className="report-button"
+            onClick={() => navigate("/reports")}
+          >
             View Reports
           </button>
         </section>
-      </main>
+
+      </div>
     </div>
   );
 }

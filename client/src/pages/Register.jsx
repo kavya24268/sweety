@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import "../App.css";
 
 const API_BASE_URL = "http://localhost:5000/api";
 
@@ -82,43 +83,18 @@ function Register() {
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "#f7f8fc",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "400px",
-          padding: "32px",
-          backgroundColor: "white",
-          borderRadius: "10px",
-          boxShadow: "0 4px 15px rgba(0, 0, 0, 0.1)",
-        }}
-      >
-        <h1 style={{ textAlign: "center", marginBottom: "5px" }}>
-          Sweety
-        </h1>
+    <div className="auth-page">
+      <div className="auth-card">
+        <div className="brand">
+          <h1>Sweety</h1>
+          <p>Blood Glucose Tracker</p>
+        </div>
 
-        <p style={{ textAlign: "center", color: "#666" }}>
-          Blood Glucose Tracker
-        </p>
-
-        <h2 style={{ textAlign: "center" }}>Create Account</h2>
+        <h2>Create your account</h2>
 
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: "18px" }}>
-            <label
-              htmlFor="name"
-              style={{ display: "block", marginBottom: "6px" }}
-            >
-              Name
-            </label>
+          <div className="form-group">
+            <label htmlFor="name">Full name</label>
 
             <input
               id="name"
@@ -128,25 +104,12 @@ function Register() {
               onChange={handleChange}
               placeholder="Enter your name"
               autoFocus
-              required
-              style={{
-                width: "100%",
-                boxSizing: "border-box",
-                padding: "10px",
-                border: "1px solid #aaa",
-                borderRadius: "5px",
-                fontSize: "15px",
-              }}
+              autoComplete="name"
             />
           </div>
 
-          <div style={{ marginBottom: "18px" }}>
-            <label
-              htmlFor="email"
-              style={{ display: "block", marginBottom: "6px" }}
-            >
-              Email
-            </label>
+          <div className="form-group">
+            <label htmlFor="email">Email address</label>
 
             <input
               id="email"
@@ -154,26 +117,13 @@ function Register() {
               type="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="Enter your email"
-              required
-              style={{
-                width: "100%",
-                boxSizing: "border-box",
-                padding: "10px",
-                border: "1px solid #aaa",
-                borderRadius: "5px",
-                fontSize: "15px",
-              }}
+              placeholder="you@example.com"
+              autoComplete="email"
             />
           </div>
 
-          <div style={{ marginBottom: "18px" }}>
-            <label
-              htmlFor="password"
-              style={{ display: "block", marginBottom: "6px" }}
-            >
-              Password
-            </label>
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
 
             <input
               id="password"
@@ -181,52 +131,37 @@ function Register() {
               type="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="Enter your password"
+              placeholder="At least 6 characters"
               minLength="6"
-              required
-              style={{
-                width: "100%",
-                boxSizing: "border-box",
-                padding: "10px",
-                border: "1px solid #aaa",
-                borderRadius: "5px",
-                fontSize: "15px",
-              }}
+              autoComplete="new-password"
             />
           </div>
 
           {error && (
-            <p style={{ color: "red", marginBottom: "15px" }}>
+            <div className="error-message">
               {error}
-            </p>
+            </div>
           )}
 
           {success && (
-            <p style={{ color: "green", marginBottom: "15px" }}>
+            <div className="success-message">
               {success}
-            </p>
+            </div>
           )}
 
           <button
             type="submit"
+            className="primary-button"
             disabled={loading}
-            style={{
-              width: "100%",
-              padding: "11px",
-              border: "none",
-              borderRadius: "5px",
-              cursor: loading ? "not-allowed" : "pointer",
-              fontSize: "15px",
-            }}
           >
-            {loading ? "Creating account..." : "Register"}
+            {loading ? "Creating account..." : "Create account"}
           </button>
         </form>
 
-        <p style={{ textAlign: "center", marginTop: "20px" }}>
+        <div className="auth-footer">
           Already have an account?{" "}
           <Link to="/login">Login</Link>
-        </p>
+        </div>
       </div>
     </div>
   );

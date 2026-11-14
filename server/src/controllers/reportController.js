@@ -1,5 +1,8 @@
 const pool = require("../config/db");
 
+const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const MONTH_PATTERN = /^\d{4}-\d{2}$/;
+
 const getDailyReport = async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -12,9 +15,7 @@ const getDailyReport = async (req, res) => {
       });
     }
 
-    const datePattern = /^\d{4}-\d{2}-\d{2}$/;
-
-    if (!datePattern.test(date)) {
+    if (!DATE_PATTERN.test(date)) {
       return res.status(400).json({
         success: false,
         message: "Date must be in YYYY-MM-DD format",
@@ -24,7 +25,7 @@ const getDailyReport = async (req, res) => {
     const result = await pool.query(
       `SELECT
         id,
-        reading_date,
+        reading_date::text AS reading_date,
         slot,
         glucose_value
        FROM readings
@@ -100,9 +101,7 @@ const getMonthToDateReport = async (req, res) => {
       });
     }
 
-    const datePattern = /^\d{4}-\d{2}-\d{2}$/;
-
-    if (!datePattern.test(date)) {
+    if (!DATE_PATTERN.test(date)) {
       return res.status(400).json({
         success: false,
         message: "Date must be in YYYY-MM-DD format",
@@ -114,13 +113,14 @@ const getMonthToDateReport = async (req, res) => {
     const result = await pool.query(
       `SELECT
         id,
-        reading_date,
+        reading_date::text AS reading_date,
         slot,
         glucose_value
        FROM readings
        WHERE user_id = $1
        AND reading_date BETWEEN $2 AND $3
-       ORDER BY reading_date ASC,
+       ORDER BY
+         reading_date ASC,
          CASE slot
            WHEN 'Morning' THEN 1
            WHEN 'After breakfast' THEN 2
@@ -192,9 +192,7 @@ const getMonthlyReport = async (req, res) => {
       });
     }
 
-    const monthPattern = /^\d{4}-\d{2}$/;
-
-    if (!monthPattern.test(month)) {
+    if (!MONTH_PATTERN.test(month)) {
       return res.status(400).json({
         success: false,
         message: "Month must be in YYYY-MM format",
@@ -206,14 +204,15 @@ const getMonthlyReport = async (req, res) => {
     const result = await pool.query(
       `SELECT
         id,
-        reading_date,
+        reading_date::text AS reading_date,
         slot,
         glucose_value
        FROM readings
        WHERE user_id = $1
        AND reading_date >= $2::date
        AND reading_date < ($2::date + INTERVAL '1 month')
-       ORDER BY reading_date ASC,
+       ORDER BY
+         reading_date ASC,
          CASE slot
            WHEN 'Morning' THEN 1
            WHEN 'After breakfast' THEN 2

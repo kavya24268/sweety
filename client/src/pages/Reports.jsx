@@ -2,20 +2,25 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-const API_BASE_URL = "http://localhost:5000/api";
+const API_BASE_URL = "https://sweety-k9ev.onrender.com/api";
 
 function Reports() {
   const { token } = useAuth();
   const navigate = useNavigate();
 
-  const [reportType, setReportType] = useState("daily");
+  const [reportType, setReportType] =
+    useState("daily");
 
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
+  const [selectedDate, setSelectedDate] =
+    useState(
+      new Date()
+        .toISOString()
+        .split("T")[0]
+    );
 
   const [report, setReport] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] =
+    useState(false);
   const [error, setError] = useState("");
 
   const fetchReport = async () => {
@@ -26,9 +31,13 @@ function Reports() {
       let endpoint;
 
       if (reportType === "daily") {
-        endpoint = `/reports/daily?date=${selectedDate}`;
-      } else if (reportType === "month-to-date") {
-        endpoint = `/reports/month-to-date?date=${selectedDate}`;
+        endpoint =
+          `/reports/daily?date=${selectedDate}`;
+      } else if (
+        reportType === "month-to-date"
+      ) {
+        endpoint =
+          `/reports/month-to-date?date=${selectedDate}`;
       } else {
         endpoint = `/reports/monthly`;
       }
@@ -37,7 +46,8 @@ function Reports() {
         `${API_BASE_URL}${endpoint}`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization:
+              `Bearer ${token}`,
           },
         }
       );
@@ -46,7 +56,8 @@ function Reports() {
 
       if (!response.ok) {
         throw new Error(
-          data.message || "Failed to load report"
+          data.message ||
+            "Failed to load report"
         );
       }
 
@@ -74,10 +85,11 @@ function Reports() {
 
   return (
     <div className="reports-page">
+
       <div className="reports-container">
 
-        {/* HEADER */}
         <header className="report-header">
+
           <div>
             <h1>Sweety</h1>
             <p>Blood Glucose Reports</p>
@@ -85,16 +97,19 @@ function Reports() {
 
           <button
             className="back-button"
-            onClick={() => navigate("/dashboard")}
+            onClick={() =>
+              navigate("/dashboard")
+            }
           >
             ← Back to Dashboard
           </button>
+
         </header>
 
-        {/* CONTROLS */}
         <section className="report-controls">
 
           <div className="form-group">
+
             <label htmlFor="reportType">
               Report Type
             </label>
@@ -103,11 +118,14 @@ function Reports() {
               id="reportType"
               value={reportType}
               onChange={(event) => {
-                setReportType(event.target.value);
+                setReportType(
+                  event.target.value
+                );
                 setReport(null);
                 setError("");
               }}
             >
+
               <option value="daily">
                 Daily
               </option>
@@ -119,11 +137,15 @@ function Reports() {
               <option value="monthly">
                 Monthly
               </option>
+
             </select>
+
           </div>
 
           {reportType === "monthly" ? (
+
             <div className="form-group">
+
               <label htmlFor="monthlyPeriod">
                 Period
               </label>
@@ -138,9 +160,13 @@ function Reports() {
                 }
                 readOnly
               />
+
             </div>
+
           ) : (
+
             <div className="form-group">
+
               <label htmlFor="date">
                 Date
               </label>
@@ -151,10 +177,14 @@ function Reports() {
                 value={selectedDate}
                 max={today}
                 onChange={(event) =>
-                  setSelectedDate(event.target.value)
+                  setSelectedDate(
+                    event.target.value
+                  )
                 }
               />
+
             </div>
+
           )}
 
           <button
@@ -167,29 +197,28 @@ function Reports() {
               ? "Loading..."
               : "Generate Report"}
           </button>
+
         </section>
 
-        {/* ERROR */}
         {error && (
           <div className="error-message">
             {error}
           </div>
         )}
 
-        {/* LOADING */}
         {loading && (
           <div className="loading">
             Loading report...
           </div>
         )}
 
-        {/* REPORT */}
         {!loading && report && (
           <>
-            {/* SUMMARY */}
+
             <section className="summary-grid">
 
               <div className="summary-card">
+
                 <p>Highest</p>
 
                 <h3>
@@ -197,9 +226,11 @@ function Reports() {
                     ? "No data"
                     : `${report.highest} mg/dL`}
                 </h3>
+
               </div>
 
               <div className="summary-card">
+
                 <p>Lowest</p>
 
                 <h3>
@@ -207,9 +238,11 @@ function Reports() {
                     ? "No data"
                     : `${report.lowest} mg/dL`}
                 </h3>
+
               </div>
 
               <div className="summary-card">
+
                 <p>Average</p>
 
                 <h3>
@@ -217,53 +250,66 @@ function Reports() {
                     ? "No data"
                     : `${report.average} mg/dL`}
                 </h3>
+
               </div>
 
               <div className="summary-card">
+
                 <p>Total Readings</p>
 
                 <h3>
                   {report.count}
                 </h3>
+
               </div>
 
             </section>
 
-            {/* TABLE */}
             <section className="report-table-card">
 
               <h2>
+
                 {reportType === "daily" &&
                   `Readings for ${report.date}`}
 
-                {reportType === "month-to-date" &&
+                {reportType ===
+                  "month-to-date" &&
                   `Readings from ${report.startDate} to ${report.endDate}`}
 
                 {reportType === "monthly" &&
                   `Readings for ${report.month}`}
+
               </h2>
 
               {report.readings.length === 0 ? (
+
                 <div className="empty-state">
                   No readings found for this period.
                 </div>
+
               ) : (
+
                 <div className="table-wrapper">
 
                   <table className="readings-table">
 
                     <thead>
+
                       <tr>
                         <th>Date</th>
                         <th>Slot</th>
                         <th>Glucose</th>
                       </tr>
+
                     </thead>
 
                     <tbody>
+
                       {report.readings.map(
                         (reading) => (
-                          <tr key={reading.id}>
+                          <tr
+                            key={reading.id}
+                          >
 
                             <td>
                               {reading.reading_date}
@@ -284,17 +330,22 @@ function Reports() {
                           </tr>
                         )
                       )}
+
                     </tbody>
 
                   </table>
 
                 </div>
+
               )}
+
             </section>
+
           </>
         )}
 
       </div>
+
     </div>
   );
 }

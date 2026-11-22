@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "../App.css";
 
-const API_BASE_URL = "http://localhost:5000/api";
+const API_BASE_URL = "https://sweety-k9ev.onrender.com/api";
 
 const SLOTS = [
   "Morning",
@@ -22,7 +22,9 @@ function Dashboard() {
   const [editingId, setEditingId] = useState(null);
 
   const [formData, setFormData] = useState({
-    readingDate: new Date().toISOString().split("T")[0],
+    readingDate: new Date()
+      .toISOString()
+      .split("T")[0],
     slot: "Morning",
     glucoseValue: "",
   });
@@ -32,16 +34,21 @@ function Dashboard() {
       setLoading(true);
       setError("");
 
-      const response = await fetch(`${API_BASE_URL}/readings`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/readings`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to load readings");
+        throw new Error(
+          data.message || "Failed to load readings"
+        );
       }
 
       setReadings(data.readings);
@@ -77,15 +84,24 @@ function Dashboard() {
       return false;
     }
 
-    const glucoseValue = Number(formData.glucoseValue);
+    const glucoseValue = Number(
+      formData.glucoseValue
+    );
 
     if (!Number.isInteger(glucoseValue)) {
-      setError("Glucose value must be a whole number");
+      setError(
+        "Glucose value must be a whole number"
+      );
       return false;
     }
 
-    if (glucoseValue < 40 || glucoseValue > 600) {
-      setError("Glucose value must be between 40 and 600 mg/dL");
+    if (
+      glucoseValue < 40 ||
+      glucoseValue > 600
+    ) {
+      setError(
+        "Glucose value must be between 40 and 600 mg/dL"
+      );
       return false;
     }
 
@@ -96,7 +112,9 @@ function Dashboard() {
     setEditingId(null);
 
     setFormData({
-      readingDate: new Date().toISOString().split("T")[0],
+      readingDate: new Date()
+        .toISOString()
+        .split("T")[0],
       slot: "Morning",
       glucoseValue: "",
     });
@@ -111,26 +129,33 @@ function Dashboard() {
       return;
     }
 
-    const glucoseValue = Number(formData.glucoseValue);
+    const glucoseValue = Number(
+      formData.glucoseValue
+    );
 
     try {
-      const response = await fetch(`${API_BASE_URL}/readings`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          readingDate: formData.readingDate,
-          slot: formData.slot,
-          glucoseValue,
-        }),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/readings`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            readingDate: formData.readingDate,
+            slot: formData.slot,
+            glucoseValue,
+          }),
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to add reading");
+        throw new Error(
+          data.message || "Failed to add reading"
+        );
       }
 
       resetForm();
@@ -147,7 +172,9 @@ function Dashboard() {
     setFormData({
       readingDate: reading.reading_date,
       slot: reading.slot,
-      glucoseValue: String(reading.glucose_value),
+      glucoseValue: String(
+        reading.glucose_value
+      ),
     });
 
     setError("");
@@ -162,7 +189,9 @@ function Dashboard() {
       return;
     }
 
-    const glucoseValue = Number(formData.glucoseValue);
+    const glucoseValue = Number(
+      formData.glucoseValue
+    );
 
     try {
       const response = await fetch(
@@ -184,7 +213,9 @@ function Dashboard() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to update reading");
+        throw new Error(
+          data.message || "Failed to update reading"
+        );
       }
 
       resetForm();
@@ -225,7 +256,9 @@ function Dashboard() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to delete reading");
+        throw new Error(
+          data.message || "Failed to delete reading"
+        );
       }
 
       if (editingId === readingId) {
@@ -247,15 +280,17 @@ function Dashboard() {
     <div className="dashboard-page">
       <div className="dashboard-container">
 
-        {/* TOP BAR */}
         <header className="topbar">
+
           <div className="brand-small">
             <h1>Sweety</h1>
             <p>Blood Glucose Tracker</p>
           </div>
 
           <div className="user-area">
-            <span>Welcome, {user?.name}</span>
+            <span>
+              Welcome, {user?.name}
+            </span>
 
             <button
               className="logout-button"
@@ -264,20 +299,24 @@ function Dashboard() {
               Logout
             </button>
           </div>
+
         </header>
 
-        {/* WELCOME */}
         <section className="welcome-card">
-          <h2>Hello, {user?.name} 🌸</h2>
+
+          <h2>
+            Hello, {user?.name} 🌸
+          </h2>
 
           <p>
-            Keep track of your blood glucose readings and stay
-            consistent with your daily monitoring.
+            Keep track of your blood glucose readings
+            and stay consistent with your daily monitoring.
           </p>
+
         </section>
 
-        {/* ADD / EDIT READING */}
         <section className="content-card">
+
           <h2>
             {editingId
               ? "Edit Glucose Reading"
@@ -286,23 +325,39 @@ function Dashboard() {
 
           <form
             className="reading-form"
-            onSubmit={editingId ? handleUpdate : handleSubmit}
+            onSubmit={
+              editingId
+                ? handleUpdate
+                : handleSubmit
+            }
           >
+
             <div className="form-group">
-              <label htmlFor="readingDate">Date</label>
+
+              <label htmlFor="readingDate">
+                Date
+              </label>
 
               <input
                 id="readingDate"
                 name="readingDate"
                 type="date"
                 value={formData.readingDate}
-                max={new Date().toISOString().split("T")[0]}
+                max={
+                  new Date()
+                    .toISOString()
+                    .split("T")[0]
+                }
                 onChange={handleChange}
               />
+
             </div>
 
             <div className="form-group">
-              <label htmlFor="slot">Reading Slot</label>
+
+              <label htmlFor="slot">
+                Reading Slot
+              </label>
 
               <select
                 id="slot"
@@ -311,14 +366,19 @@ function Dashboard() {
                 onChange={handleChange}
               >
                 {SLOTS.map((slot) => (
-                  <option key={slot} value={slot}>
+                  <option
+                    key={slot}
+                    value={slot}
+                  >
                     {slot}
                   </option>
                 ))}
               </select>
+
             </div>
 
             <div className="form-group">
+
               <label htmlFor="glucoseValue">
                 Glucose (mg/dL)
               </label>
@@ -334,14 +394,18 @@ function Dashboard() {
                 onChange={handleChange}
                 placeholder="Enter glucose value"
               />
+
             </div>
 
             <button
               type="submit"
               className="add-reading-button"
             >
-              {editingId ? "Update Reading" : "Add Reading"}
+              {editingId
+                ? "Update Reading"
+                : "Add Reading"}
             </button>
+
           </form>
 
           {error && (
@@ -351,8 +415,8 @@ function Dashboard() {
           )}
 
           <p className="form-note">
-            Enter a whole-number glucose value between 40 and
-            600 mg/dL.
+            Enter a whole-number glucose value between
+            40 and 600 mg/dL.
           </p>
 
           {editingId && (
@@ -364,10 +428,11 @@ function Dashboard() {
               Cancel Edit
             </button>
           )}
+
         </section>
 
-        {/* READINGS */}
         <section className="content-card">
+
           <h2>Your Readings</h2>
 
           {loading ? (
@@ -381,7 +446,9 @@ function Dashboard() {
             </div>
           ) : (
             <div className="table-wrapper">
+
               <table className="readings-table">
+
                 <thead>
                   <tr>
                     <th>Date</th>
@@ -392,9 +459,13 @@ function Dashboard() {
                 </thead>
 
                 <tbody>
+
                   {readings.map((reading) => (
                     <tr key={reading.id}>
-                      <td>{reading.reading_date}</td>
+
+                      <td>
+                        {reading.reading_date}
+                      </td>
 
                       <td>
                         <span className="slot-badge">
@@ -409,7 +480,9 @@ function Dashboard() {
                       </td>
 
                       <td>
+
                         <div className="action-buttons">
+
                           <button
                             className="edit-button"
                             onClick={() =>
@@ -427,24 +500,34 @@ function Dashboard() {
                           >
                             Delete
                           </button>
+
                         </div>
+
                       </td>
+
                     </tr>
                   ))}
+
                 </tbody>
+
               </table>
+
             </div>
           )}
+
         </section>
 
-        {/* REPORTS */}
         <section className="content-card">
+
           <button
             className="report-button"
-            onClick={() => navigate("/reports")}
+            onClick={() =>
+              navigate("/reports")
+            }
           >
             View Reports
           </button>
+
         </section>
 
       </div>

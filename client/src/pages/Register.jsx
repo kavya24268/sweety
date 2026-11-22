@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "../App.css";
 
-const API_BASE_URL = "http://localhost:5000/api";
+const API_BASE_URL = "https://sweety-k9ev.onrender.com/api";
 
 function Register() {
   const navigate = useNavigate();
@@ -52,25 +52,32 @@ function Register() {
     try {
       setLoading(true);
 
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: formData.name.trim(),
-          email: formData.email.trim(),
-          password: formData.password,
-        }),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/auth/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: formData.name.trim(),
+            email: formData.email.trim(),
+            password: formData.password,
+          }),
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Registration failed");
+        throw new Error(
+          data.message || "Registration failed"
+        );
       }
 
-      setSuccess("Registration successful! Redirecting to login...");
+      setSuccess(
+        "Registration successful! Redirecting to login..."
+      );
 
       setTimeout(() => {
         navigate("/login");
@@ -85,6 +92,7 @@ function Register() {
   return (
     <div className="auth-page">
       <div className="auth-card">
+
         <div className="brand">
           <h1>Sweety</h1>
           <p>Blood Glucose Tracker</p>
@@ -93,8 +101,11 @@ function Register() {
         <h2>Create your account</h2>
 
         <form onSubmit={handleSubmit}>
+
           <div className="form-group">
-            <label htmlFor="name">Full name</label>
+            <label htmlFor="name">
+              Full name
+            </label>
 
             <input
               id="name"
@@ -109,7 +120,9 @@ function Register() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="email">Email address</label>
+            <label htmlFor="email">
+              Email address
+            </label>
 
             <input
               id="email"
@@ -123,7 +136,9 @@ function Register() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">
+              Password
+            </label>
 
             <input
               id="password"
@@ -154,14 +169,20 @@ function Register() {
             className="primary-button"
             disabled={loading}
           >
-            {loading ? "Creating account..." : "Create account"}
+            {loading
+              ? "Creating account..."
+              : "Create account"}
           </button>
+
         </form>
 
         <div className="auth-footer">
           Already have an account?{" "}
-          <Link to="/login">Login</Link>
+          <Link to="/login">
+            Login
+          </Link>
         </div>
+
       </div>
     </div>
   );
